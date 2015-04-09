@@ -1,65 +1,39 @@
-var pocCanvasTimer = pocCanvasTimer || {};
+var Clock = {
+  totalSeconds: 0,
 
-(function (context, $) {
+  start: function () {
+    var self = this;
+    var fiveMinutes = 60 * 5;
+    var duration = fiveMinutes;
+    var timer = duration, minutes, seconds;
+    display = document.querySelector('#time');
 
-    // Render text on Canvas using global timer variables
-    function drawCanvas(countdownText){
-        var c = document.getElementById("myCanvas"),
-            ctx = c.getContext("2d"),
-            background = new Image();
+    this.interval = setInterval(function () {
+        minutes = parseInt(timer / 60, 10)
+        seconds = parseInt(timer % 60, 10);
 
-        ctx.clearRect(0, 0, c.width, c.height);
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
 
-        background.onload = function () {
-            c.width = background.width;
-            c.height = background.height;
-            ctx.drawImage(background, 0, 0);
+        display.textContent = minutes + ":" + seconds;
 
-            ctx.font = "30px Verdana";
+        if (--timer < 0) {
+            clearInterval(this.interval);
+        }
+    }, 1000);
+  },
 
-            // Create gradient
-            var gradient = ctx.createLinearGradient(0, 0, c.width, 0);
-            gradient.addColorStop("0", "magenta");
-            gradient.addColorStop("0.5", "blue");
-            gradient.addColorStop("1.0", "red");
+  pause: function () {
+    clearInterval(this.interval);
+    delete this.interval;
+  },
 
-            // Fill with gradient
-            ctx.fillStyle = gradient;
-            ctx.fillText(countdownText, 10, 90);
-        };
-        
-        
-                
-        background.src = "img/bg.jpg";
+  resume: function () {
+    if (!this.interval) this.start();
+  }
+};
 
-    }
+Clock.start();
 
-    // Calculate seconds countdown timer
-    function generateTimer(){
-        // set the date we're counting down to
-        var target_date = new Date("Aug 15, 2016").getTime();
-         
-        // variables for time units
-        var remainingTime = 600;
-         
-        // update the tag with id "countdown" every 1 second
-        setInterval(function () {       
-            minutes = parseInt(remainingTime / 60);
-            seconds = parseInt(remainingTime % 60);
-             
-            // format countdown string + set tag value
-            timeOnCanvas = minutes + "m " + seconds + "s";  
-
-            drawCanvas(timeOnCanvas);
-
-            remainingTime--;
-        }, 1000);      
-    }
-
-    function init() {
-        generateTimer();
-    }
-
-    init();
-
-})(pocCanvasTimer);
+document.getElementById('pause').addEventListener('click', function () { Clock.pause(); }, false);
+document.getElementById('resume').addEventListener('click', function () { Clock.resume(); }, false);
