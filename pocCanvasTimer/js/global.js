@@ -1,26 +1,43 @@
 var Clock = {
   totalSeconds: 0,
 
+  setSeconds : function(seconds) {
+    self = this;
+    this.totalSeconds = seconds;
+    //- must clear interval in case user decides to switch between timers while the countdown is on.
+    clearInterval(this.interval);
+    delete this.interval;
+    //- start the clock!
+    this.start();
+  },
+
   start: function () {
     var self = this;
-    var fiveMinutes = 60 * 5;
-    var duration = fiveMinutes;
-    var timer = duration, minutes, seconds;
-    display = document.querySelector('#time');
+    var display = document.getElementById('time');
+    var minutes, seconds;
 
-    this.interval = setInterval(function () {
-        minutes = parseInt(timer / 60, 10)
-        seconds = parseInt(timer % 60, 10);
+    
+      this.interval = setInterval(function () {
+        
+        if (self.totalSeconds > 0) {
+          //- keep counting down as long as we haven't run out of seconds.
+          self.totalSeconds -= 1;
+          minutes = Math.floor(self.totalSeconds / 60 % 60);
+          seconds = parseInt(self.totalSeconds % 60);
 
-        minutes = minutes < 10 ? "0" + minutes : minutes;
-        seconds = seconds < 10 ? "0" + seconds : seconds;
-
-        display.textContent = minutes + ":" + seconds;
-
-        if (--timer < 0) {
+          //- add a nifty little 0 to the left of single-digit numbers.
+          minutes = minutes < 10 ? '0' + minutes : minutes;
+          seconds = seconds < 10 ? '0' + seconds : seconds;
+          display.textContent = minutes + ":" + seconds;
+        }  else {
+            //- the countdown reached its end. reset the display.
             clearInterval(this.interval);
+            delete this.interval;
+            display.textContent = "ti:me";
         }
-    }, 1000);
+            
+      }, 1000);
+    
   },
 
   pause: function () {
@@ -33,7 +50,7 @@ var Clock = {
   }
 };
 
-Clock.start();
-
 document.getElementById('pause').addEventListener('click', function () { Clock.pause(); }, false);
 document.getElementById('resume').addEventListener('click', function () { Clock.resume(); }, false);
+document.getElementById('fiveMinutes').addEventListener('click', function () { Clock.setSeconds(300); }, false);
+document.getElementById('tenMinutes').addEventListener('click', function () { Clock.setSeconds(600); }, false);
